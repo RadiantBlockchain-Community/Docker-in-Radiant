@@ -7,20 +7,15 @@
 FROM ubuntu:22.04
 
 LABEL maintainer="code@radiant4people.com"
-LABEL version="1.2.0"
+LABEL version="1.3.0"
 LABEL description="Docker image for radiantd node"
 
 ARG DEBIAN_FRONTEND=nointeractive
 RUN apt update
-RUN apt-get install -y curl
-RUN curl -sL https://deb.nodesource.com/setup_18.x | bash -
-RUN apt-get install -y nodejs
 
 ENV PACKAGES="\
   build-essential \
-  libcurl4-openssl-dev \
   software-properties-common \
-  ubuntu-drivers-common \
   pkg-config \
   libtool \
   openssh-server \
@@ -31,8 +26,6 @@ ENV PACKAGES="\
   libjansson-dev \
   libevent-dev \
   uthash-dev \
-  nodejs \
-  vim \
   libboost-chrono-dev \
   libboost-filesystem-dev \
   libboost-test-dev \
@@ -45,48 +38,33 @@ ENV PACKAGES="\
   ninja-build \
   python3 \
   libdb++-dev \
-  wget \
-  cmake \
-  ocl-icd-* \
-  opencl-headers \
-  ocl-icd-opencl-dev\
-"
-# Note can remove the opencl and ocl packages above when not building on a system for GPU/mining
-# Included only for reference purposes if this container would be used for mining as well.
+  cmake"
 
 RUN apt update && apt install --no-install-recommends -y $PACKAGES  && \
     rm -rf /var/lib/apt/lists/* && \
     apt clean
  
-# Install radiant-node
+# Install radiant-node v1.3.0
 WORKDIR /root
-RUN git clone --depth 1 --branch v1.2.0 https://github.com/radiantblockchain/radiant-node.git
+RUN git clone --depth 1 --branch v1.3.0 https://github.com/radiantblockchain/radiant-node.git
 RUN mkdir /root/radiant-node/build
+
 WORKDIR /root/radiant-node/build
 RUN cmake -GNinja .. -DBUILD_RADIANT_QT=OFF -DBUILD_RADIANT_WALLET=OFF
 RUN ninja
 RUN ninja install
 
-# Create directory
-RUN mkdir "/root/.radiant/"
-RUN touch "/root/.radiant/radiant.conf"
+# Remove radiant-node folder, not need more
+RUN rm /root/radiant-node -R
+WORKDIR /root
 
-RUN echo "rpcuser=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 15 | head -n 1)" >>/root/.radiant/radiant.conf 
-RUN echo "rpcpassword=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 20 | head -n 1)" >>/root/.radiant/radiant.conf 
+COPY radiantnode.sh /radiantnode.sh
+RUN chmod 755 /radiantnode.sh
 
-RUN echo '\
-\n\
-listen=1\n\
-daemon=0\n\
-server=1\n\
-rest=1\n\
-rpcworkqueue=32\n\
-rpcthreads=32\n\
-rpcallowip=0.0.0.0/0\
-' >>/root/.radiant/radiant.conf  
-
-EXPOSE 7332 7333
+EXPOSE 7333
  
-VOLUME /root
+RUN mkdir -p /data
 
-ENTRYPOINT ["/bin/sh", "-c" , "radiantd"]
+VOLUME /data
+
+ENTRYPOINT ["/bin/sh", "-c" , "/radiantnode.sh"]
