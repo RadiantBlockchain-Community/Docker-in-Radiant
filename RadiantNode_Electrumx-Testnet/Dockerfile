@@ -5,14 +5,11 @@
 FROM ubuntu:22.04
 
 LABEL maintainer="code@radiant4people.com"
-LABEL version="1.0.0"
-LABEL description="Docker image for electrumx and radiantd node"
+LABEL version="1.3.0"
+LABEL description="Docker image for electrumx and radiantd node in testnet mode"
 
 ARG DEBIAN_FRONTEND=nointeractive
 RUN apt update
-RUN apt-get install -y curl
-RUN curl -sL https://deb.nodesource.com/setup_18.x | bash -
-RUN apt-get install -y nodejs
 
 ENV PACKAGES="\
   build-essential \
@@ -21,7 +18,6 @@ ENV PACKAGES="\
   ubuntu-drivers-common \
   pkg-config \
   libtool \
-  openssh-server \
   git \
   clinfo \
   autoconf \
@@ -29,8 +25,6 @@ ENV PACKAGES="\
   libjansson-dev \
   libevent-dev \
   uthash-dev \
-  nodejs \
-  vim \
   libboost-chrono-dev \
   libboost-filesystem-dev \
   libboost-test-dev \
@@ -44,61 +38,31 @@ ENV PACKAGES="\
   python3 \
   python3-pip \
   libdb++-dev \
-  wget \
   cmake \
 "
 RUN apt update && apt install --no-install-recommends -y $PACKAGES  && \
     rm -rf /var/lib/apt/lists/* && \
     apt clean
-
-####################################################### INSTALL RADIANT-NODE
+ 
+# Install radiant-node v1.3.0
 WORKDIR /root
-RUN git clone https://github.com/radiantblockchain/radiant-node.git
+RUN git clone --depth 1 --branch v1.3.0 https://github.com/radiantblockchain/radiant-node.git
 RUN mkdir /root/radiant-node/build
+
 WORKDIR /root/radiant-node/build
-# Compile with wallet
-# RUN cmake -GNinja .. -DBUILD_RADIANT_QT=OFF
-# Compile without wallet (default)
-RUN cmake -GNinja .. -DBUILD_RADIANT_WALLET=OFF -DBUILD_RADIANT_QT=OFF
+RUN cmake -GNinja .. -DBUILD_RADIANT_QT=OFF -DBUILD_RADIANT_WALLET=OFF
 RUN ninja
 RUN ninja install
 
 # Remove radiant-node folder, not need more
 RUN rm /root/radiant-node -R
 
-RUN mkdir "/root/.radiant/"
-RUN touch "/root/.radiant/radiant.conf"
-
-RUN echo '\
-rpcuser=RadiantDockerUser\n\
-rpcpassword=RadiantDockerPassword\n\
-\n\
-listen=1\n\
-daemon=1\n\
-server=1\n\
-testnet=1\n\
-dbcache=2\n\
-rest=1\n\
-daemon=1\n\
-[test]\n\
-port=17333\n\
-rpcport=17332\n\
-rpcworkqueue=1024\n\
-rpcthreads=64\n\
-addnode=194.163.159.47\n\
-addnode=217.182.174.119\n\
-rpcallowip=0.0.0.0/0\
-' >/root/.radiant/radiant.conf 
-
 ####################################################### INSTALL ELECTRUMX WITH SSL
-
-# Create directory for DB
-RUN mkdir /root/electrumdb
 
 WORKDIR /root
 
 # ORIGINAL SOURCE
-RUN git clone https://github.com/radiantblockchain/electrumx.git
+RUN git clone --depth 1 --branch master https://github.com/radiantblockchain/electrumx.git
 
 WORKDIR /root/electrumx
 
@@ -108,24 +72,28 @@ ENV DAEMON_URL=http://RadiantDockerUser:RadiantDockerPassword@localhost:17332/
 ENV COIN=RadiantTestnet
 ENV NET=testnet
 ENV REQUEST_TIMEOUT=60
-ENV DB_DIRECTORY=/root/electrumdb
+ENV DB_DIRECTORY=/data/radiantnode_testnet_electrumx/electrumdb
 ENV DB_ENGINE=leveldb
 ENV SERVICES=tcp://0.0.0.0:51010,ssl://0.0.0.0:51012,rpc://0.0.0.0:8000
-ENV SSL_CERTFILE=/root/electrumdb/server.crt
-ENV SSL_KEYFILE=/root/electrumdb/server.key
+ENV SSL_CERTFILE=/data/radiantnode_testnet_electrumx/electrumdb/server.crt
+ENV SSL_KEYFILE=/data/radiantnode_testnet_electrumx/electrumdb/server.key
 ENV HOST=""
 ENV ALLOW_ROOT=true
-ENV CACHE_MB=10000
-ENV MAX_SESSIONS=10000
+ENV CACHE_MB=1500
+ENV MAX_SESSIONS=5000
 ENV MAX_SEND=10000000
 ENV MAX_RECV=10000000
+ENV COST_SOFT_LIMIT=0
+ENV COST_HARD_LIMIT=0
 
-# Create SSL
-WORKDIR /root/electrumdb
-RUN openssl genrsa -out server.key 2048
-RUN openssl req -new -key server.key -out server.csr -subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=radiant4people.com"
-RUN openssl x509 -req -days 1825 -in server.csr -signkey server.key -out server.crt
+EXPOSE 17333 51010 51012
 
-EXPOSE 17333 17332 51010 51012
+COPY radiantnode_electrumx_testnet.sh /radiantnode_electrumx_testnet.sh
 
-ENTRYPOINT ["/bin/sh", "-c" , "radiantd && python3 /root/electrumx/electrumx_server"]
+RUN chmod 755 /radiantnode_electrumx_testnet.sh
+
+RUN mkdir -p /data
+
+VOLUME /data
+
+ENTRYPOINT ["/bin/sh", "-c" , "/radiantnode_electrumx_testnet.sh"]
