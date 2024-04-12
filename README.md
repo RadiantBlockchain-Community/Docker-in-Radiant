@@ -1,7 +1,7 @@
 # Docker-in-Radiant
 **Dockerhub:** https://hub.docker.com/u/radiantcommunity
 
-Docker scripts for Radiant blockchain.
+Docker scripts for Radiant blockchain..
 
 ## Create image
 ```
