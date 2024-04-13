@@ -5,7 +5,7 @@ Docker scripts for Radiant blockchain.
 
 ## Create image
 ```
-docker build -t <name-image> .
+docker build -t <name-image> ..
 ```
 
 ## Run image
