@@ -63,7 +63,7 @@ RUN apt update \
    && apt clean 
 
    ENV DAEMON_URL=http://RadiantDockerUser:RadiantDockerPassword@localhost:17332/
-   ENV COIN=RadiantTestnet
+   ENV COIN=Radiant
    ENV NET=testnet
    ENV REQUEST_TIMEOUT=60
    ENV DB_DIRECTORY=/data/radiantnode_testnet_electrumx/electrumdb
