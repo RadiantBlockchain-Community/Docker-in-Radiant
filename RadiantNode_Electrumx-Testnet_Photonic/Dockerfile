@@ -82,7 +82,7 @@ RUN apt update \
    
    EXPOSE 17333 51010 51012 51020
    
-   COPY radiantnode_electrumx_testnet.sh /radiantnode_electrumx_testnet_photonic.sh
+   COPY radiantnode_electrumx_testnet_photonic.sh /radiantnode_electrumx_testnet_photonic.sh
    
    RUN chmod 755 /radiantnode_electrumx_testnet_photonic.sh
    
