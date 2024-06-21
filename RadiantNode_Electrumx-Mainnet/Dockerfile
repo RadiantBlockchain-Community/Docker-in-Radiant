@@ -56,7 +56,7 @@ RUN apt update \
    && ninja \
    && ninja install \
    && rm -rf /root/* /tmp/* /var/tmp/* \
-   && git clone --depth 1 --branch master hhttps://github.com/RadiantBlockchain-Community/electrumx.git \
+   && git clone --depth 1 --branch master https://github.com/RadiantBlockchain-Community/electrumx.git \
    && python3 -m pip install -r /root/electrumx/requirements.txt \
    && apt remove -y $REMOVE \
    && apt autoremove -y \
