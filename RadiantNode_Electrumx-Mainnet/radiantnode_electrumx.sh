@@ -14,7 +14,7 @@ rest=1
 dbcache=10
 txindex=1
 rpcworkqueue=1024
-rpcthreads=64
+rpcthreads=128
 rpcallowip=0.0.0.0/0
 EOF
 fi

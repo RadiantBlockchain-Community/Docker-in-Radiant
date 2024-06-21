@@ -8,7 +8,7 @@ FROM ubuntu:22.04
 
 LABEL maintainer="code@radiant4people.com"
 LABEL version="1.3.0"
-LABEL description="Docker image for radiantd node with wallet"
+LABEL description="Docker image for radiantd nodee with electrumx for photonic"
 
 ARG DEBIAN_FRONTEND=nointeractive
 
@@ -55,7 +55,7 @@ RUN apt update \
    && ninja \
    && ninja install \
    && rm -rf /root/* /tmp/* /var/tmp/* \
-   && git clone --depth 1 --branch master hhttps://github.com/RadiantBlockchain-Community/electrumx.git \
+   && git clone --depth 1 --branch zerorefs https://github.com/1razoo/electrumx.git \
    && python3 -m pip install -r /root/electrumx/requirements.txt \
    && apt remove -y $REMOVE \
    && apt autoremove -y \
@@ -63,12 +63,12 @@ RUN apt update \
    && apt clean 
 
    ENV DAEMON_URL=http://RadiantDockerUser:RadiantDockerPassword@localhost:17332/
-   ENV COIN=RadiantTestnet
+   ENV COIN=Radiant
    ENV NET=testnet
    ENV REQUEST_TIMEOUT=60
    ENV DB_DIRECTORY=/data/radiantnode_testnet_electrumx/electrumdb
    ENV DB_ENGINE=leveldb
-   ENV SERVICES=tcp://0.0.0.0:51010,ssl://0.0.0.0:51012,wss://0.0.0.0:51022,rpc://0.0.0.0:8000
+   ENV SERVICES=tcp://0.0.0.0:51010,ssl://0.0.0.0:51012,wss://0.0.0.0:51002,rpc://0.0.0.0:8000
    ENV SSL_CERTFILE=/data/radiantnode_testnet_electrumx/electrumdb/server.crt
    ENV SSL_KEYFILE=/data/radiantnode_testnet_electrumx/electrumdb/server.key
    ENV HOST=""
@@ -77,17 +77,17 @@ RUN apt update \
    ENV MAX_SESSIONS=5000
    ENV MAX_SEND=10000000
    ENV MAX_RECV=10000000
-   ENV COST_SOFT_LIMIT=10
-   ENV COST_HARD_LIMIT=10
+   ENV COST_SOFT_LIMIT=0
+   ENV COST_HARD_LIMIT=0
    
-   EXPOSE 17333 51010 51012 51022
+   EXPOSE 17333 51010 51012 51020
    
-   COPY radiantnode_electrumx_testnet.sh /radiantnode_electrumx_testnet.sh
+   COPY radiantnode_electrumx_testnet_photonic.sh /radiantnode_electrumx_testnet_photonic.sh
    
-   RUN chmod 755 /radiantnode_electrumx_testnet.sh
+   RUN chmod 755 /radiantnode_electrumx_testnet_photonic.sh
    
    RUN mkdir -p /data
    
    VOLUME /data
    
-   ENTRYPOINT ["/bin/sh", "-c" , "/radiantnode_electrumx_testnet.sh"]
+   ENTRYPOINT ["/bin/sh", "-c" , "/radiantnode_electrumx_testnet_photonic.sh"]

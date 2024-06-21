@@ -56,7 +56,7 @@ RUN apt update \
    && ninja \
    && ninja install \
    && rm -rf /root/* /tmp/* /var/tmp/* \
-   && git clone --depth 1 --branch master https://github.com/radiantblockchain/electrumx.git \
+   && git clone --depth 1 --branch master hhttps://github.com/RadiantBlockchain-Community/electrumx.git \
    && python3 -m pip install -r /root/electrumx/requirements.txt \
    && apt remove -y $REMOVE \
    && apt autoremove -y \
@@ -68,7 +68,7 @@ ENV COIN=Radiant
 ENV REQUEST_TIMEOUT=60
 ENV DB_DIRECTORY=/data/radiantnode_electrumx/electrumdb
 ENV DB_ENGINE=leveldb
-ENV SERVICES=tcp://0.0.0.0:50010,ssl://0.0.0.0:50012,wss://0.0.0.0:50002,rpc://0.0.0.0:8000
+ENV SERVICES=tcp://0.0.0.0:50010,ssl://0.0.0.0:50012,wss://0.0.0.0:50022,rpc://0.0.0.0:8000
 ENV SSL_CERTFILE=/data/radiantnode_electrumx/electrumdb/server.crt
 ENV SSL_KEYFILE=/data/radiantnode_electrumx/electrumdb/server.key
 ENV HOST=""
@@ -77,10 +77,10 @@ ENV CACHE_MB=2000
 ENV MAX_SESSIONS=5000
 ENV MAX_SEND=10000000
 ENV MAX_RECV=10000000
-ENV COST_SOFT_LIMIT=0
-ENV COST_HARD_LIMIT=0
+ENV COST_SOFT_LIMIT=10
+ENV COST_HARD_LIMIT=10
 
-EXPOSE 7333 50010 50012 50020
+EXPOSE 7333 50010 50012 50022
 
 COPY radiantnode_electrumx.sh /radiantnode_electrumx.sh
 
