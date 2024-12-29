@@ -55,7 +55,7 @@ RUN apt update \
    && ninja \
    && ninja install \
    && rm -rf /root/* /tmp/* /var/tmp/* \
-   && git clone --depth 1 --branch master hhttps://github.com/RadiantBlockchain-Community/electrumx.git \
+   && git clone --depth 1 --branch master https://github.com/RadiantBlockchain-Community/electrumx.git \
    && python3 -m pip install -r /root/electrumx/requirements.txt \
    && apt remove -y $REMOVE \
    && apt autoremove -y \
@@ -75,10 +75,10 @@ RUN apt update \
    ENV ALLOW_ROOT=true
    ENV CACHE_MB=1500
    ENV MAX_SESSIONS=5000
-   ENV MAX_SEND=10000000
-   ENV MAX_RECV=10000000
-   ENV COST_SOFT_LIMIT=10
-   ENV COST_HARD_LIMIT=10
+   ENV MAX_SEND=1000000000
+   ENV MAX_RECV=1000000000
+   ENV COST_SOFT_LIMIT=0
+   ENV COST_HARD_LIMIT=0
    
    EXPOSE 17333 51010 51012 51022
    
